@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.DS_Store
+Thumbs.db
+test-results/
+playwright-report/
+tests/screenshots/
+# Raw Higgsfield inputs are large — keep them out of git (built frames in public/ ARE committed)
+assets-src/**/*.png
+assets-src/**/*.jpg
+assets-src/**/*.jpeg
+assets-src/**/*.webp
+assets-src/**/*.mp4
+assets-src/**/*.mov
+assets-src/.cache/

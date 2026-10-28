@@ -1,0 +1,310 @@
+/* ── Type ──────────────────────────────────────────────── */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.eyebrow.is-gold {
+  color: var(--gold);
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: var(--fs-headline);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+  font-weight: 850;
+  margin: 0;
+}
+
+.headline .l1,
+.headline .l2 {
+  display: block;
+}
+
+.headline .l1 {
+  font-weight: 250;
+}
+
+.headline .l2 {
+  font-weight: 850;
+}
+
+/* mask-reveal lines: wrap each line's text in .line-inner */
+.headline .mask {
+  display: block;
+  overflow: hidden;
+  /* keep descenders + tight leading safe */
+  padding-block: 0.04em;
+  margin-block: -0.04em;
+}
+
+.headline .mask > span {
+  display: block;
+}
+
+.h-sm {
+  font-size: clamp(2.2rem, 5.2vw, 5.4rem);
+}
+
+.body {
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.55;
+  color: var(--text-body);
+  max-width: 46ch;
+}
+
+/* ── Glass ─────────────────────────────────────────────── */
+.glass {
+  position: relative;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  isolation: isolate;
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 40%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ── Chip ──────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  padding: 6px 11px;
+  border: 1px solid var(--accent-35);
+  background: var(--accent-12);
+  color: var(--accent);
+  border-radius: var(--pill);
+  white-space: nowrap;
+}
+
+a.chip,
+button.chip {
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out);
+}
+
+a.chip:hover,
+button.chip:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.chip.is-muted {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn {
+  --h: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: var(--h);
+  padding: 0 22px;
+  border-radius: var(--pill);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out),
+    transform 0.3s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+}
+
+.btn-ghost {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-ghost.has-icon {
+  padding-left: 9px;
+}
+
+.btn-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 9px;
+  letter-spacing: 0;
+  transition: background 0.3s var(--ease-out);
+}
+
+.btn-ghost:hover .btn-icon {
+  background: var(--accent);
+}
+
+.btn-sm {
+  --h: 36px;
+  padding: 0 16px;
+  font-size: 10.5px;
+}
+
+.btn-lg {
+  --h: 54px;
+  padding: 0 28px;
+  font-size: 12px;
+}
+
+.text-link {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text);
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 3px;
+  transition:
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.text-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Segmented control ─────────────────────────────────── */
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 4px;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.segmented button {
+  position: relative;
+  z-index: 1;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--pill);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  transition: color 0.35s var(--ease-out);
+  white-space: nowrap;
+}
+
+.segmented button[aria-pressed='true'],
+.segmented button[aria-checked='true'],
+.segmented button[aria-selected='true'] {
+  color: var(--bg);
+}
+
+.segmented .pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: var(--pill);
+  background: var(--text);
+  transition:
+    transform 0.45s var(--ease-out),
+    width 0.45s var(--ease-out);
+  pointer-events: none;
+}
+
+/* ── Entrance reveal (driven by lib/reveal.ts) ─────────── */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(8px);
+}
+
+.js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+  transition:
+    opacity 0.8s var(--ease-out),
+    transform 0.8s var(--ease-out),
+    filter 0.8s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

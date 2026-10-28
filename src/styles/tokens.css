@@ -1,0 +1,47 @@
+/*
+ * Design tokens. The three brand colors and font names (--brand-*) are injected
+ * from src/config/brand.ts in layouts/Base.astro — never hardcode them here.
+ */
+:root {
+  --bg: var(--brand-bg, #060809);
+  --bg-2: color-mix(in oklab, var(--bg) 88%, white 4%);
+  --text: #f2f5f7;
+  --text-body: rgba(242, 245, 247, 0.82);
+  --muted: #8e9aa3;
+  --faint: #5b666e;
+  --accent: var(--brand-accent, #62f0d8);
+  --accent-12: color-mix(in oklab, var(--accent) 12%, transparent);
+  --accent-35: color-mix(in oklab, var(--accent) 35%, transparent);
+  --gold: var(--brand-gold, #ffc94a);
+  --glass: rgba(12, 16, 19, 0.52);
+  --glass-strong: rgba(10, 13, 16, 0.72);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --radius-s: 10px;
+  --radius-m: 18px;
+  --radius-l: 28px;
+  --pill: 999px;
+
+  --shadow-card: 0 30px 80px -20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --gutter: clamp(16px, 4vw, 48px);
+  --nav-h: 72px;
+  --max: 1320px;
+
+  --font-display: var(--brand-font-display), 'Arial Black', system-ui, sans-serif;
+  --font-body: var(--brand-font-body), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--brand-font-mono), ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --fs-headline: clamp(2.8rem, 7.2vw, 8rem);
+  --fs-card-title: clamp(1.4rem, 2.2vw, 2.1rem);
+
+  color-scheme: dark;
+}
+
+@media (max-width: 819px) {
+  :root {
+    --nav-h: 60px;
+  }
+}

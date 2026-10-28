@@ -1,0 +1,20 @@
+{
+  "fps_out": 24,
+  "desktop": { "width": 1440, "quality": 68 },
+  "mobile":  { "width": 720,  "quality": 70 },
+  "segments": [
+    { "id": "S01", "from": "KF00", "to": "KF01", "chapter": "arrival", "frames": 26 },
+    { "id": "S02", "from": "KF01", "to": "KF02", "chapter": "foam",    "frames": 22 },
+    { "id": "S03", "from": "KF02", "to": "KF03", "chapter": "wash",    "frames": 22 },
+    { "id": "S04", "from": "KF03", "to": "KF04", "chapter": "rinse",   "frames": 22 },
+    { "id": "S05", "from": "KF04", "to": "KF05", "chapter": "wheels",  "frames": 22, "camera": "push-in" },
+    { "id": "S06", "from": "KF05", "to": "KF06", "chapter": "iron",    "frames": 20 },
+    { "id": "S07", "from": "KF06", "to": "KF07", "chapter": "iron",    "frames": 20 },
+    { "id": "S08", "from": "KF07", "to": "KF08", "chapter": "dry",     "frames": 22, "camera": "pull-back", "transitionOut": "flash" },
+    { "id": "S09", "from": "KF09", "to": "KF10", "chapter": "vacuum",  "frames": 22 },
+    { "id": "S10", "from": "KF10", "to": "KF11", "chapter": "leather", "frames": 22, "transitionOut": "flash" },
+    { "id": "S11", "from": "KF12", "to": "KF13", "chapter": "glass",   "frames": 22 },
+    { "id": "S12", "from": "KF13", "to": "KF14", "chapter": "protect", "frames": 22 },
+    { "id": "S13", "from": "KF14", "to": null,   "chapter": "reveal",  "frames": 30 }
+  ]
+}
