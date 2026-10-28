@@ -1,7 +1,27 @@
 ---
 import Base from '../layouts/Base.astro';
+import Loader from '../components/Loader.astro';
+import Nav from '../components/Nav.astro';
+import Theater from '../components/Theater.astro';
+import MobileActionBar from '../components/MobileActionBar.astro';
 import { copy } from '../config/copy';
+import { posterUrl } from '../lib/assets.server';
+
+const dPoster = posterUrl('desktop');
+const mPoster = posterUrl('mobile');
 ---
+
 <Base title={copy.meta.title} description={copy.meta.description}>
-  <h1 class="headline"><span class="l1">Grime in.</span><span class="l2">Glass out.</span></h1>
+  <Fragment slot="head">
+    {mPoster && <link rel="preload" as="image" href={mPoster} media="(max-aspect-ratio: 4/5)" fetchpriority="high" />}
+    <link rel="preload" as="image" href={dPoster} media={mPoster ? '(min-aspect-ratio: 401/500)' : undefined} fetchpriority="high" />
+  </Fragment>
+  <Loader />
+  <Nav />
+  <main id="top">
+    <Theater />
+    <section id="before-after" class="section" style="min-height:100vh"><h2 class="headline">Next</h2></section>
+    <section id="packages" class="section" style="min-height:100vh"></section>
+  </main>
+  <MobileActionBar />
 </Base>

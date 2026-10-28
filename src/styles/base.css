@@ -149,6 +149,7 @@ html.lenis body {
   margin-bottom: clamp(40px, 6vw, 80px);
 }
 
-body.scroll-locked {
+html.scroll-locked,
+html.scroll-locked body {
   overflow: hidden;
 }

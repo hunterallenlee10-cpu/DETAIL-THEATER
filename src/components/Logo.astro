@@ -1,0 +1,76 @@
+---
+import { brand, nameParts } from '../config/brand';
+import { logoMarkSvg } from '../lib/logo-mark';
+
+interface Props {
+  id?: string;
+  showTagline?: boolean;
+  size?: number;
+}
+const { id = 'logo', showTagline = true, size = 34 } = Astro.props;
+---
+
+<span class="logo">
+  {
+    brand.LOGO_FILE ? (
+      <img class="logo-file" src={brand.LOGO_FILE} alt="" width={size} height={size} />
+    ) : (
+      <span class="logo-mark" set:html={logoMarkSvg('currentColor', { id, size })} />
+    )
+  }
+  <span class="logo-text">
+    <span class="logo-name"><b>{nameParts.first}</b>{nameParts.rest && <span> {nameParts.rest}</span>}</span>
+    {showTagline && <span class="logo-tag">{brand.TAGLINE}</span>}
+  </span>
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+  }
+
+  .logo-mark,
+  .logo-file {
+    flex: none;
+    display: block;
+  }
+
+  .logo-mark {
+    color: var(--accent);
+  }
+
+  .logo-text {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logo-name b {
+    font-weight: 800;
+  }
+
+  .logo-tag {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+</style>

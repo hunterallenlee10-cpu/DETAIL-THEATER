@@ -1,0 +1,92 @@
+---
+import { brand, telHref, smsHref } from '../config/brand';
+import { copy } from '../config/copy';
+---
+
+<div class="action-bar" data-track-area="action-bar">
+  <div class="bar-inner glass">
+    <a class="bar-btn" href={telHref}><span class="ico" aria-hidden="true">☏</span>{copy.actionBar.call}</a>
+    {brand.SMS_ENABLED && <a class="bar-btn" href={smsHref(copy.finalCta.smsBody)}><span class="ico" aria-hidden="true">✉</span>{copy.actionBar.text}</a>}
+    <button class="bar-btn is-primary" type="button" data-quote-open>{copy.actionBar.quote}</button>
+  </div>
+</div>
+
+<script>
+  import { ScrollTrigger, initScroll } from '../lib/lenis';
+  initScroll();
+  const bar = document.querySelector<HTMLElement>('.action-bar');
+  if (bar) {
+    ScrollTrigger.create({
+      start: () => window.innerHeight * 0.45,
+      end: 'max',
+      onToggle: (self) => bar.classList.toggle('is-visible', self.isActive),
+    });
+  }
+</script>
+
+<style>
+  .action-bar {
+    display: none;
+  }
+
+  @media (max-width: 819px) {
+    .action-bar {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 790;
+      padding: 0 10px calc(10px + env(safe-area-inset-bottom));
+      transform: translateY(120%);
+      transition: transform 0.5s var(--ease-out);
+      pointer-events: none;
+    }
+
+    .action-bar:global(.is-visible) {
+      transform: none;
+      pointer-events: auto;
+    }
+
+    :global(html:is(.quote-open, .hud-open, .menu-open)) .action-bar {
+      transform: translateY(120%);
+      pointer-events: none;
+    }
+
+    .bar-inner {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 6px;
+      padding: 6px;
+      border-radius: var(--pill);
+      background: var(--glass-strong);
+    }
+
+    .bar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 46px;
+      border-radius: var(--pill);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .bar-btn.is-primary {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .ico {
+      font-size: 13px;
+      letter-spacing: 0;
+      color: var(--accent);
+    }
+  }
+</style>
