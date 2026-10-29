@@ -64,3 +64,12 @@ Everything below is still a `[bracket]` placeholder or an unconfirmed default in
 
 - **Playwright web server** uses `scripts/serve-dist.mjs` (a 40-line static server) because Astro 7's `astro preview` detaches into the background in agent environments, which Playwright reads as "exited early".
 - **Visual test screenshots** are per section, because a single full-page capture of a ~17,000px page exceeds Chrome's screenshot height limit.
+
+## Real assets (Phase 3)
+
+- **Generated through the Higgsfield connection** (Hunter approved spending credits for the desktop set): Nano Banana Pro 2k for every image, Soul 2.0 for the detailer reference, Kling 3.0 pro 5s (sound off) for every clip. 3 takes of the master plate (B chosen), 2 detailer references (A chosen, no logo), 2 paint macros; every later keyframe is an edit of the previous one + KF00 (+ detailer ref), per the shotlist method.
+- **S08 uses the reverse trick:** it was generated as a push-in from KF08 to KF07 and is played backwards (`"reverse": true`), so it reads as the pull-back.
+- **Derived mobile set:** no 9:16 clips were generated. Instead `npm run sequence` crops a 9:16 window out of the full-resolution desktop clips (`"derive": true` on the mobile set). Each segment's `mobileFocal` sets where the window sits; a list of values pans it over the clip (S05 follows the camera move into the wheel). That gives phones sharper frames than cropping the 1440px desktop frames in the browser, at 13.8MB. If real vertical clips are dropped into `assets-src/mobile/clips/`, they take priority automatically.
+- **Focal points re-measured on the real composition:** the car's center sits at ~60% of the frame width (wide shots), so `WIDE` focal, poster/final-CTA `object-position` and the exterior before/after crop use 60%.
+- **Payload:** desktop 22.1MB (limit 30), mobile 13.8MB (limit 15).
+- **Known AI quirks, acceptable for scrubbing:** in S03 most of the foam disappears quickly mid-clip; in S05 the camera orbits further than asked before pushing into the wheel; the car's grille changes slightly after KF04. Regenerate those clips in the web app if the client notices.

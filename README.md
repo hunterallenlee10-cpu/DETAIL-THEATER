@@ -69,6 +69,7 @@ assets-src/
 | `speedCurve` | `linear` · `easeIn` · `easeOut` · `easeInOut` — remaps which source frames get sampled |
 | `eq` | `{ "brightness": 0.03, "contrast": 1.05, "saturation": 1.1, "gamma": 1 }` to match a clip that drifts in color |
 | `crop` | `{ "x": 0, "y": 40, "w": 1920, "h": 1000 }` in source pixels |
+| `mobileFocal` | Where the derived 9:16 phone crop sits (0–1 across the frame). A list like `[0.7, 0.55, 0.45]` pans the crop through those points over the clip. Only used when there are no real mobile clips and the mobile set has `"derive": true` |
 | `transitionOut` | `"flash"` = light-bloom cut into the next segment (used for exterior ↔ interior jumps) |
 
 Desktop and mobile sets always get identical frame counts so they share one scroll timeline. The script warns if desktop > 30MB or mobile > 15MB.

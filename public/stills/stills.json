@@ -1,26 +1,7 @@
 {
-  "version": "smvsrh00l",
-  "path": "/stills/smvsrh00l/",
-  "placeholders": [
-    "BA-CLEAN",
-    "KF00",
-    "KF01",
-    "KF02",
-    "KF03",
-    "KF04",
-    "KF05",
-    "KF06",
-    "KF07",
-    "KF08",
-    "KF09",
-    "KF10",
-    "KF11",
-    "KF12",
-    "KF13",
-    "KF14",
-    "PAINT-MACRO",
-    "PAINT-MACRO-DULL"
-  ],
+  "version": "smvstxok4",
+  "path": "/stills/smvstxok4/",
+  "placeholders": [],
   "crops": [
     "KF00",
     "BA-CLEAN",
@@ -29,5 +10,5 @@
     "KF09",
     "KF11"
   ],
-  "loop": false
+  "loop": true
 }

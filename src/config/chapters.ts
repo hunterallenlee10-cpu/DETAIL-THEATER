@@ -31,9 +31,9 @@ export interface Chapter {
   still: string;
 }
 
-const WIDE: Focal = { x: 0.58, y: 0.55 };
+const WIDE: Focal = { x: 0.6, y: 0.5 };
 const CLOSE: Focal = { x: 0.5, y: 0.5 };
-const INTERIOR: Focal = { x: 0.45, y: 0.5 };
+const INTERIOR: Focal = { x: 0.55, y: 0.5 };
 
 const ownWater = brand.TRUST_BADGES.own_water_and_power;
 

@@ -46,9 +46,28 @@ function probe(file) {
   return { w: s.width, h: s.height, fps: b ? a / b : a, duration: Number(j.format.duration), frames: Number(s.nb_frames) || null };
 }
 
-function filterChain(seg, width) {
+/**
+ * Derived mobile set: a 9:16 window cropped from the full-resolution desktop clip.
+ * seg.mobileFocal is a single x (0–1) or a list of x values spaced evenly over the
+ * clip's duration; the window pans through them linearly so it can follow the action.
+ */
+function mobileCrop(seg, duration) {
+  const pts = Array.isArray(seg.mobileFocal) ? seg.mobileFocal : [seg.mobileFocal ?? 0.5];
+  const u = `min(1,t/${duration.toFixed(3)})`;
+  let fx = String(pts[pts.length - 1]);
+  for (let k = pts.length - 2; k >= 0; k--) {
+    const u0 = k / (pts.length - 1);
+    const u1 = (k + 1) / (pts.length - 1);
+    const seg = `${pts[k]}+(${(pts[k + 1] - pts[k]).toFixed(4)})*(${u}-${u0.toFixed(4)})/${(u1 - u0).toFixed(4)}`;
+    fx = `if(lt(${u},${u1.toFixed(4)}),${seg},${fx})`;
+  }
+  return `crop=w='trunc(ih*9/16/2)*2':h=ih:x='max(0,min(iw-ow,(${fx})*iw-ow/2))':y=0`;
+}
+
+function filterChain(seg, width, derived = null) {
   const f = [];
   if (seg.crop) f.push(`crop=${seg.crop.w}:${seg.crop.h}:${seg.crop.x}:${seg.crop.y}`);
+  if (derived) f.push(mobileCrop(seg, derived.duration));
   f.push(`scale=${width}:-2:flags=lanczos`);
   if (seg.eq) {
     const e = seg.eq;
@@ -59,7 +78,10 @@ function filterChain(seg, width) {
 }
 
 async function buildSet(name, opts) {
-  const missing = cfg.segments.filter((s) => !clipPath(name, s.id)).map((s) => `assets-src/${name}/clips/${s.id}.mp4`);
+  // No dedicated vertical clips? Derive the mobile set by cropping the desktop clips (opts.derive).
+  const derive = name === 'mobile' && opts.derive && cfg.segments.every((s) => !clipPath('mobile', s.id));
+  const src = derive ? 'desktop' : name;
+  const missing = cfg.segments.filter((s) => !clipPath(src, s.id)).map((s) => `assets-src/${src}/clips/${s.id}.mp4`);
   if (missing.length) {
     if (name === 'mobile' && missing.length === cfg.segments.length) return null;
     console.error(`\n✖ ${name}: missing ${missing.length} clip(s):\n  ${missing.join('\n  ')}`);
@@ -72,10 +94,11 @@ async function buildSet(name, opts) {
 
   for (const [i, seg] of cfg.segments.entries()) {
     const p = plan.segments[i];
-    const file = clipPath(name, seg.id);
+    const file = clipPath(src, seg.id);
     const info = probe(file);
     const t0 = seg.trimStart ?? 0;
     const t1 = Math.max(t0 + 0.1, info.duration - (seg.trimEnd ?? 0));
+    const derived = derive ? { duration: t1 - t0 } : null;
 
     // decode the (trimmed, filtered) clip to temporary PNGs, then pick frames by timestamp
     const tmp = path.join(cacheRoot, name, seg.id);
@@ -84,7 +107,7 @@ async function buildSet(name, opts) {
     execFileSync(ffmpegPath, [
       '-y', '-loglevel', 'error',
       '-ss', String(t0), '-to', String(t1), '-i', file,
-      '-vf', filterChain(seg, opts.width),
+      '-vf', filterChain(seg, opts.width, derived),
       '-fps_mode', 'passthrough', '-an',
       path.join(tmp, '%05d.png'),
     ]);
@@ -128,7 +151,7 @@ async function buildSet(name, opts) {
     process.stdout.write(`  ${seg.id} ✔\r`);
   }
 
-  console.log(`\n${name.toUpperCase()} (${dims.w}×${dims.h}, q${opts.quality})`);
+  console.log(`\n${name.toUpperCase()} (${dims.w}×${dims.h}, q${opts.quality})${derive ? ' — derived 9:16 crop of the desktop clips' : ''}`);
   console.table(rows);
   const totalMb = rows.reduce((a, r) => a + r.kb, 0) / 1024;
   console.log(`  total: ${plan.count} frames · ${totalMb.toFixed(1)} MB`);
