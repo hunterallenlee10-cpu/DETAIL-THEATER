@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "description": "Cinematic scroll-scrub website template for mobile detailers — Lee Enterprises Unlimited",
+  "description": "Cinematic scroll-scrub website template for mobile detailers \u2014 Lee Enterprises Unlimited",
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
@@ -37,5 +37,8 @@
     "opentype.js": "^2.0.0",
     "sharp": "^0.35.5",
     "tsx": "^4.23.15"
+  },
+  "engines": {
+    "node": ">=22.22.0"
   }
 }
