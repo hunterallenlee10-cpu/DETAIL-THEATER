@@ -1,0 +1,108 @@
+---
+import { copy } from '../config/copy';
+import { activeBadges } from '../config/brand';
+import SectionHead from './SectionHead.astro';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="section why" aria-labelledby="why-title">
+  <div class="wrap">
+    <SectionHead id="why-title" eyebrow={copy.whyUs.eyebrow} line1={copy.whyUs.line1} line2={copy.whyUs.line2} />
+    <ul class="tiles">
+      {
+        copy.whyUs.tiles.map((t, i) => (
+          <li class="tile glass" data-reveal style={`--i:${i}`}>
+            <span class="tile-num mono">{pad(i + 1)}</span>
+            <h3 class="tile-title">{t.title}</h3>
+            <p class="tile-body">{t.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+    {
+      activeBadges.length > 0 && (
+        <ul class="badges" aria-label="Credentials">
+          {activeBadges.map((b, i) => (
+            <li class="chip" data-reveal style={`--i:${i}`}>
+              <span aria-hidden="true">✓</span> {b}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .why {
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .tile {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 26px 24px 28px;
+    min-height: 220px;
+    transition: border-color 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  }
+
+  .tile:hover {
+    border-color: var(--accent-35);
+  }
+
+  .tile-num {
+    color: var(--accent);
+    margin-bottom: auto;
+  }
+
+  .tile-title {
+    margin-top: 48px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+
+  .tile-body {
+    color: var(--text-body);
+    font-size: 15px;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  @media (max-width: 1023px) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 559px) {
+    .tile {
+      min-height: 0;
+      padding: 20px 18px 22px;
+    }
+
+    .tile-title {
+      margin-top: 22px;
+    }
+
+    .tile-body {
+      font-size: 14px;
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import Logo from '../components/Logo.astro';
+import { brand, mailHref, telHref } from '../config/brand';
+
+const updated = new Date().toISOString().slice(0, 10);
+---
+
+<Base title={`Privacy | ${brand.BRAND_NAME}`} description={`How ${brand.BRAND_NAME} handles the information you send through the quote form.`} path="/privacy">
+  <main class="doc">
+    <a href="/" class="back"><Logo id="pv-logo" /></a>
+    <p class="eyebrow">Privacy</p>
+    <h1 class="headline h-sm"><span class="l1">Your info,</span><span class="l2">kept simple.</span></h1>
+    <p class="mono updated">Last updated {updated}</p>
+
+    <h2>What we collect</h2>
+    <p>When you request a quote, we receive what you type into the form: your name, phone number, ZIP code or address, vehicle, preferred date and time, notes, and the package and add-ons you picked. We also see which page you came from (for example, a link with campaign tags) so we know how you found us.</p>
+
+    <h2>How we use it</h2>
+    <p>Only to respond to your request: to confirm pricing, schedule your detail, and contact you about that booking by call or text. We do not sell your information or share it with anyone for their own marketing.</p>
+
+    <h2>Where it goes</h2>
+    <p>Your quote is sent to us by text message, email, or our booking system, depending on how the form is set up. Those services store messages under their own privacy terms.</p>
+
+    <h2>How long we keep it</h2>
+    <p>We keep booking details for as long as we need them to serve you and keep basic business records. Ask us any time to delete your information.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or deletion requests: <a href={mailHref('Privacy request')}>{brand.EMAIL}</a> or <a href={telHref}>{brand.PHONE_DISPLAY}</a>.</p>
+  </main>
+</Base>
+
+<style>
+  .doc {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(32px, 6vw, 72px) var(--gutter) 120px;
+    display: grid;
+    gap: 18px;
+  }
+
+  .back {
+    margin-bottom: 48px;
+  }
+
+  .updated {
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    margin-top: 22px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-transform: uppercase;
+  }
+
+  p {
+    color: var(--text-body);
+  }
+
+  p a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

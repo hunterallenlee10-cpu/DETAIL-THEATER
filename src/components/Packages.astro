@@ -1,0 +1,309 @@
+---
+/**
+ * Packages + vehicle-size switch. Changing the size tweens every
+ * [data-prices] element on the page and remembers the choice on
+ * <html data-vehicle-size> so the Quote Drawer opens with the same size.
+ */
+import { brand } from '../config/brand';
+import { copy } from '../config/copy';
+
+const sizes = brand.VEHICLE_SIZES;
+const fmt = (n: number) => `$${n.toLocaleString('en-US')}`;
+---
+
+<section id="packages" class="section packages" aria-labelledby="packages-h" data-track-area="packages">
+  <div class="wrap">
+    <div class="pk-head">
+      <div class="section-head">
+        <p class="eyebrow" data-reveal>{copy.packages.eyebrow}</p>
+        <h2 class="headline" id="packages-h" data-reveal style="--i:1">
+          <span class="l1">{copy.packages.line1}</span>
+          <span class="l2">{copy.packages.line2}</span>
+        </h2>
+      </div>
+      <div class="size-switch" data-reveal style="--i:2">
+        <p class="mono size-label" id="size-label">{copy.quote.size}</p>
+        <div class="segmented" role="radiogroup" aria-labelledby="size-label" style={`--n:${sizes.length};--idx:0`}>
+          <span class="pill" aria-hidden="true"></span>
+          {
+            sizes.map((s, i) => (
+              <button type="button" role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-size={i}>
+                {s}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <ul class="pk-grid">
+      {
+        brand.PACKAGES.map((p, i) => (
+          <li class:list={['pk-card glass', { 'is-featured': p.featured }]} data-reveal style={`--i:${i}`}>
+            <div class="pk-top">
+              <h3 class="pk-name">{p.name}</h3>
+              {p.badge && <span class="chip">{p.badge}</span>}
+            </div>
+            <p class="pk-blurb">{p.blurb}</p>
+            <p class="pk-price">
+              <span class="sr-only">From </span>
+              <span class="price" data-prices={JSON.stringify(p.prices)}>
+                {fmt(p.prices[0])}
+              </span>
+              <span class="mono pk-dur">{p.duration}</span>
+            </p>
+            <ul class="pk-list">
+              {p.includes.map((inc) => (
+                <li>
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M3 8.5l3 3 7-7" />
+                  </svg>
+                  {inc}
+                </li>
+              ))}
+            </ul>
+            <button
+              class:list={['btn', p.featured ? 'btn-primary' : 'btn-ghost', 'pk-cta']}
+              type="button"
+              data-quote-open
+              data-package={p.id}
+            >
+              {copy.packages.cta}
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="mono pk-fine" data-reveal>{copy.packages.fine}</p>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('packages');
+  const group = root?.querySelector<HTMLElement>('.segmented');
+  if (root && group) {
+    const btns = Array.from(group.querySelectorAll<HTMLButtonElement>('button[data-size]'));
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fmt = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+    const tweens = new WeakMap<HTMLElement, number>();
+
+    const tweenPrice = (el: HTMLElement, to: number) => {
+      const from = Number(el.dataset.value ?? to);
+      el.dataset.value = String(to);
+      cancelAnimationFrame(tweens.get(el) ?? 0);
+      if (reduce || from === to) {
+        el.textContent = fmt(to);
+        return;
+      }
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - t0) / 600);
+        const e = 1 - Math.pow(1 - t, 3);
+        el.textContent = fmt(from + (to - from) * e);
+        if (t < 1) tweens.set(el, requestAnimationFrame(step));
+      };
+      tweens.set(el, requestAnimationFrame(step));
+    };
+
+    const apply = (idx: number, focus = false, emit = true) => {
+      group.style.setProperty('--idx', String(idx));
+      btns.forEach((b, i) => {
+        b.setAttribute('aria-checked', String(i === idx));
+        b.tabIndex = i === idx ? 0 : -1;
+        if (i === idx && focus) b.focus();
+      });
+      document.documentElement.dataset.vehicleSize = String(idx);
+      document.querySelectorAll<HTMLElement>('[data-prices]').forEach((el) => {
+        const prices = JSON.parse(el.dataset.prices || '[]') as number[];
+        if (prices.length) tweenPrice(el, prices[Math.min(idx, prices.length - 1)]);
+      });
+      if (emit) window.dispatchEvent(new CustomEvent('vehicle-size', { detail: idx }));
+    };
+
+    btns.forEach((b, i) => b.addEventListener('click', () => apply(i)));
+    group.addEventListener('keydown', (e) => {
+      const cur = btns.findIndex((b) => b.getAttribute('aria-checked') === 'true');
+      const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      apply((cur + dir + btns.length) % btns.length, true);
+    });
+    // the drawer can change size too — keep the switch + prices in sync
+    window.addEventListener('vehicle-size', (e) => {
+      const idx = (e as CustomEvent<number>).detail;
+      if (Number(group.style.getPropertyValue('--idx')) !== idx) apply(idx, false, false);
+    });
+  }
+</script>
+
+<style>
+  .pk-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px 40px;
+    margin-bottom: clamp(40px, 6vw, 80px);
+  }
+
+  .pk-head .section-head {
+    margin: 0;
+  }
+
+  .size-switch {
+    display: grid;
+    gap: 10px;
+  }
+
+  .size-label {
+    color: var(--muted);
+  }
+
+  .segmented .pill {
+    width: calc((100% - 8px) / var(--n));
+    transform: translateX(calc(var(--idx) * 100%));
+  }
+
+  .pk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(14px, 1.6vw, 24px);
+    align-items: stretch;
+    padding-top: 12px;
+  }
+
+  .pk-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: clamp(24px, 2.4vw, 34px);
+    border-radius: var(--radius-l);
+  }
+
+  .pk-card.is-featured {
+    border-color: var(--accent-35);
+    box-shadow:
+      0 0 0 1px var(--accent-35),
+      0 0 40px -6px var(--accent-35),
+      var(--shadow-card);
+  }
+
+  @media (min-width: 820px) {
+    .pk-card.is-featured {
+      position: relative;
+      top: -12px;
+    }
+  }
+
+  .pk-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .pk-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.25rem, 1.7vw, 1.6rem);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .pk-blurb {
+    color: var(--text-body);
+    font-size: 15px;
+    min-height: 3.1em;
+  }
+
+  .pk-price {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 6px 0 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .price {
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: clamp(2.6rem, 4.2vw, 3.8rem);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .is-featured .price {
+    color: var(--accent);
+  }
+
+  .pk-dur {
+    color: var(--muted);
+  }
+
+  .pk-list {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    flex: 1;
+    font-size: 14.5px;
+    color: var(--text-body);
+  }
+
+  .pk-list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .pk-list svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .pk-cta {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .pk-fine {
+    margin-top: 28px;
+    max-width: 90ch;
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.7;
+    letter-spacing: 0.12em;
+  }
+
+  @media (max-width: 1023px) {
+    .pk-grid {
+      grid-template-columns: 1fr;
+      max-width: 560px;
+    }
+    .pk-blurb {
+      min-height: 0;
+    }
+  }
+
+  @media (max-width: 819px) {
+    .size-switch,
+    .segmented {
+      width: 100%;
+    }
+    .segmented button {
+      padding: 0 8px;
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+    }
+  }
+</style>

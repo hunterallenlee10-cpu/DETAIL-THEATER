@@ -1,0 +1,134 @@
+---
+import { brand, smsHref } from '../config/brand';
+import { copy } from '../config/copy';
+import SectionHead from './SectionHead.astro';
+---
+
+<section id="area" class="section area" aria-labelledby="area-title" data-track-area="service-area">
+  <svg class="route" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden="true">
+    <path
+      class="route-bg"
+      d="M-20 470 C 180 470, 260 300, 470 320 S 760 520, 960 400 S 1240 140, 1460 190"
+    ></path>
+    <path
+      class="route-line"
+      pathLength="1"
+      d="M-20 470 C 180 470, 260 300, 470 320 S 760 520, 960 400 S 1240 140, 1460 190"
+    ></path>
+    <circle class="route-dot" r="5" cx="470" cy="320"></circle>
+    <circle class="route-dot" r="5" cx="960" cy="400"></circle>
+  </svg>
+  <div class="wrap">
+    <SectionHead id="area-title" eyebrow={copy.area.eyebrow} line1={copy.area.line1} line2={copy.area.line2} body={copy.area.body} />
+    <ul class="towns">
+      {
+        brand.SERVICE_TOWNS.map((t, i) => (
+          <li class="chip is-muted town" data-reveal style={`--i:${i}`}>
+            <span class="pin" aria-hidden="true" />
+            {t}
+          </li>
+        ))
+      }
+      {
+        brand.SMS_ENABLED && (
+          <li data-reveal style={`--i:${brand.SERVICE_TOWNS.length}`}>
+            <a class="chip" href={smsHref(`Hi! Do you service my area? My ZIP is `)}>
+              {copy.area.notListed}
+            </a>
+          </li>
+        )
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  import { gsap, reducedMotion } from '../lib/lenis';
+  const line = document.querySelector<SVGPathElement>('#area .route-line');
+  if (line && !reducedMotion()) {
+    gsap.fromTo(
+      line,
+      { strokeDashoffset: 1 },
+      {
+        strokeDashoffset: 0,
+        ease: 'none',
+        scrollTrigger: { trigger: '#area', start: 'top 85%', end: 'bottom 40%', scrub: 0.6 },
+      },
+    );
+  }
+</script>
+
+<style>
+  .area {
+    overflow: hidden;
+  }
+
+  .route {
+    position: absolute;
+    inset: 10% 0 0;
+    width: 100%;
+    height: 90%;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  .route path {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .route-bg {
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-dasharray: 4 7;
+  }
+
+  .route-line {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route-line {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .route-dot {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .wrap {
+    position: relative;
+  }
+
+  .towns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 820px;
+  }
+
+  .town {
+    font-size: 11.5px;
+    padding: 10px 16px;
+  }
+
+  .towns a.chip {
+    font-size: 11.5px;
+    padding: 10px 16px;
+  }
+
+  .pin {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+</style>

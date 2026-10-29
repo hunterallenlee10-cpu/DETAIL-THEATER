@@ -252,40 +252,43 @@ const posterAlt = `${brand.VEHICLE_SHORT} parked in a driveway, about to be deta
     max-width: 44ch;
   }
 
-  /* headline mask reveal (after the loader) */
-  :global(.js) .hero-h1 .mask > span {
+  /*
+   * Headline mask reveal (after the loader). The hero paints immediately under the
+   * opaque loader (good for LCP); when the loader starts fading, .is-prereveal snaps
+   * it to the hidden state and .is-revealed animates it in.
+   */
+  .theater:global(.is-prereveal) .hero-h1 .mask > span {
     transform: translateY(105%);
-    transition: transform 0.9s var(--ease-out);
   }
 
-  :global(.js) .hero-h1 .mask:nth-child(2) > span {
+  .theater:global(.is-prereveal) :is(.hero-eyebrow, .hero-body, .hero-btns) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .theater:global(.is-prereveal.is-revealed) .hero-h1 .mask > span,
+  .theater:global(.is-prereveal.is-revealed) :is(.hero-eyebrow, .hero-body, .hero-btns) {
+    transform: none;
+    opacity: 1;
+    transition:
+      opacity 0.8s var(--ease-out),
+      transform 0.9s var(--ease-out);
+  }
+
+  .theater:global(.is-prereveal.is-revealed) .hero-h1 .mask:nth-child(2) > span {
     transition-delay: 0.12s;
   }
 
-  :global(.js) .hero-eyebrow,
-  :global(.js) .hero-body,
-  :global(.js) .hero-btns {
-    opacity: 0;
-    transform: translateY(16px);
-    transition:
-      opacity 0.8s var(--ease-out) 0.3s,
-      transform 0.8s var(--ease-out) 0.3s;
-  }
-
-  :global(.js) .hero-eyebrow {
+  .theater:global(.is-prereveal.is-revealed) .hero-eyebrow {
     transition-delay: 0.05s;
   }
 
-  :global(.js) .hero-btns {
-    transition-delay: 0.42s;
+  .theater:global(.is-prereveal.is-revealed) .hero-body {
+    transition-delay: 0.3s;
   }
 
-  .theater:global(.is-revealed) .hero-h1 .mask > span,
-  .theater:global(.is-revealed) .hero-eyebrow,
-  .theater:global(.is-revealed) .hero-body,
-  .theater:global(.is-revealed) .hero-btns {
-    transform: none;
-    opacity: 1;
+  .theater:global(.is-prereveal.is-revealed) .hero-btns {
+    transition-delay: 0.42s;
   }
 
   .watch-btn[aria-pressed='true'] .btn-icon {
@@ -488,7 +491,7 @@ const posterAlt = `${brand.VEHICLE_SHORT} parked in a driveway, about to be deta
 
   .checklist {
     display: grid;
-    gap: 2px;
+    gap: 0;
     width: 100%;
     margin-top: 10px;
     padding-top: 12px;
@@ -501,7 +504,8 @@ const posterAlt = `${brand.VEHICLE_SHORT} parked in a driveway, about to be deta
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    padding: 3px 0;
+    min-height: 24px;
+    padding: 0;
     font-family: var(--font-mono);
     font-size: 9.5px;
     text-transform: uppercase;
@@ -760,12 +764,6 @@ const posterAlt = `${brand.VEHICLE_SHORT} parked in a driveway, about to be deta
   :global(html:not(.js)) :is(.frames, .fx, .step-card, .hud, .outro-overlay, .progress-line, .scroll-hint, .watch-btn),
   :global(html.static-theater) :is(.frames, .fx, .step-card, .hud, .outro-overlay, .progress-line, .scroll-hint, .watch-btn) {
     display: none;
-  }
-
-  :global(html.static-theater) .hero-h1 .mask > span,
-  :global(html.static-theater) :is(.hero-eyebrow, .hero-body, .hero-btns) {
-    transform: none;
-    opacity: 1;
   }
 
   :global(html:not(.js)) .theater-static,

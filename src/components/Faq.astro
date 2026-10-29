@@ -1,0 +1,146 @@
+---
+import { copy } from '../config/copy';
+import SectionHead from './SectionHead.astro';
+---
+
+<section id="faq" class="section faq" aria-labelledby="faq-title">
+  <div class="wrap faq-grid">
+    <SectionHead id="faq-title" eyebrow={copy.faq.eyebrow} line1={copy.faq.line1} line2={copy.faq.line2} />
+    <div class="items">
+      {
+        copy.faq.items.map((it, i) => (
+          <details class="item" data-reveal style={`--i:${i}`}>
+            <summary>
+              <span class="q">{it.q}</span>
+              <span class="plus" aria-hidden="true" />
+            </summary>
+            <div class="a">
+              <p>{it.a}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reducedMotion } from '../lib/lenis';
+
+  // Smooth height animation for <details>, keeping native semantics.
+  document.querySelectorAll<HTMLDetailsElement>('#faq details').forEach((d) => {
+    const summary = d.querySelector('summary')!;
+    const body = d.querySelector<HTMLElement>('.a')!;
+    let anim: Animation | null = null;
+    summary.addEventListener('click', (e) => {
+      if (reducedMotion()) return;
+      e.preventDefault();
+      anim?.cancel();
+      const opening = !d.open;
+      const start = d.offsetHeight;
+      if (opening) d.open = true;
+      const end = opening ? summary.offsetHeight + body.offsetHeight : summary.offsetHeight;
+      d.classList.toggle('is-opening', opening);
+      anim = d.animate({ height: [`${start}px`, `${end}px`] }, { duration: 420, easing: 'cubic-bezier(.22,1,.36,1)' });
+      anim.onfinish = () => {
+        if (!opening) d.open = false;
+        d.classList.remove('is-opening');
+        anim = null;
+      };
+    });
+  });
+</script>
+
+<style>
+  .faq-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+
+  .items {
+    border-top: 1px solid var(--line);
+  }
+
+  .item {
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 0;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .q {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1rem, 1.35vw, 1.2rem);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    transition: color 0.3s var(--ease-out);
+  }
+
+  summary:hover .q {
+    color: var(--accent);
+  }
+
+  .plus {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    transition:
+      transform 0.45s var(--ease-out),
+      border-color 0.3s;
+  }
+
+  .plus::before,
+  .plus::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 1.5px;
+    background: var(--text);
+    transform: translate(-50%, -50%);
+  }
+
+  .plus::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .item[open] .plus {
+    transform: rotate(45deg);
+    border-color: var(--accent);
+  }
+
+  .a p {
+    padding: 0 48px 26px 0;
+    color: var(--text-body);
+    max-width: 60ch;
+  }
+
+  @media (max-width: 899px) {
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .a p {
+      padding-right: 0;
+    }
+  }
+</style>

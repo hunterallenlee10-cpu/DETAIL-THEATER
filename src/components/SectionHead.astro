@@ -1,0 +1,29 @@
+---
+interface Props {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  body?: string;
+  id?: string;
+  center?: boolean;
+  size?: 'lg' | 'sm';
+}
+const { eyebrow, line1, line2, body, id, center = false, size = 'sm' } = Astro.props;
+---
+
+<div class:list={['section-head', { 'is-center': center }]}>
+  <p class="eyebrow" data-reveal>{eyebrow}</p>
+  <h2 class:list={['headline', { 'h-sm': size === 'sm' }]} id={id} data-reveal style="--i:1">
+    <span class="l1">{line1}</span>
+    <span class="l2">{line2}</span>
+  </h2>
+  {body && <p class="body" data-reveal style="--i:2">{body}</p>}
+  <slot />
+</div>
+
+<style>
+  .is-center {
+    justify-items: center;
+    text-align: center;
+  }
+</style>

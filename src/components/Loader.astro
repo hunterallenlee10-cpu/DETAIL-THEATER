@@ -36,6 +36,7 @@ import { logoMarkSvg } from '../lib/logo-mark';
       if (done) return;
       done = true;
       set(1);
+      window.dispatchEvent(new CustomEvent('loader:leaving'));
       el.classList.add('is-leaving');
       const finish = () => {
         el.hidden = true;

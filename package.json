@@ -14,7 +14,7 @@
     "stills": "tsx scripts/build-stills.mjs",
     "shotlist": "tsx scripts/write-shotlist.mjs",
     "test:unit": "tsx --test tests/pricing.test.ts",
-    "test:visual": "playwright test"
+    "test:visual": "playwright test tests/visual.spec.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",

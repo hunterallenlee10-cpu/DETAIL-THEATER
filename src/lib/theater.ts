@@ -463,10 +463,16 @@ function run(root: HTMLElement): void {
   };
   watchBtn.addEventListener('click', () => (playing ? stopAutoplay() : startAutoplay()));
 
-  // ── hero reveal after the loader ─────────────────────────────────────
-  const revealHero = () => root.classList.add('is-revealed');
-  if (document.documentElement.dataset.loaderDone) revealHero();
-  else window.addEventListener('loader:done', revealHero, { once: true });
+  // ── hero reveal as the loader fades ──────────────────────────────────
+  const revealHero = () => {
+    if (root.classList.contains('is-prereveal')) return;
+    root.classList.add('is-prereveal');
+    void root.offsetWidth; // commit the hidden state while the loader is still opaque
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('is-revealed')));
+  };
+  if (!document.documentElement.dataset.loaderDone) {
+    window.addEventListener('loader:leaving', revealHero, { once: true });
+  }
 
   // start loading frames after first paint
   const kick = () => store.start();

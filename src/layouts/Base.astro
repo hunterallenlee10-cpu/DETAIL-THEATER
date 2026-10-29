@@ -68,6 +68,8 @@ const headCss = [
     <meta name="twitter:image" content={ogImage} />
 
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoFont} as="font" type="font/woff2" crossorigin />
     <Fragment set:html={`<style>${headCss}</style>`} />
     <script is:inline>
       (function (d) {

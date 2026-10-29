@@ -1,0 +1,859 @@
+---
+/**
+ * Quote Drawer (right drawer ≥820px, bottom sheet below). Markup is static;
+ * behaviour lives in src/lib/quote.ts, dynamic-imported on the first click of
+ * any [data-quote-open] element (optional data-package="<id>" preselects).
+ */
+import { brand, smsHref, telHref } from '../config/brand';
+import { copy } from '../config/copy';
+
+const q = copy.quote;
+const fmt = (n: number) => `$${n.toLocaleString('en-US')}`;
+const featured = brand.PACKAGES.find((p) => p.featured) ?? brand.PACKAGES[0];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<div class="qd" id="quote-drawer" hidden data-track-area="quote">
+  <div class="qd-backdrop" data-qd-close></div>
+  <div class="qd-panel" role="dialog" aria-modal="true" aria-labelledby="qd-title" data-lenis-prevent>
+    <header class="qd-head">
+      <div class="qd-head-row">
+        <h2 id="qd-title" class="qd-title">{q.title}</h2>
+        <button class="qd-close" type="button" data-qd-close aria-label={q.close}>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+      <ol class="qd-steps" aria-label="Progress">
+        {
+          q.steps.map((s, i) => (
+            <li data-step-ind={i + 1} aria-current={i === 0 ? 'step' : undefined}>
+              <span class="n">{pad(i + 1)}</span>
+              <span>{s}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </header>
+
+    <form class="qd-form" novalidate>
+      <div class="qd-body">
+        <!-- STEP 1 — BUILD -->
+        <div class="qd-step" data-step="1">
+          <fieldset class="qd-group">
+            <legend class="mono qd-legend">{q.size}</legend>
+            <div class="qd-sizes" style={`--n:${brand.VEHICLE_SIZES.length}`}>
+              {
+                brand.VEHICLE_SIZES.map((s, i) => (
+                  <label class="qd-size">
+                    <input type="radio" name="size" value={i} checked={i === 0} />
+                    <span>{s}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset class="qd-group">
+            <legend class="mono qd-legend">{q.package}</legend>
+            <div class="qd-pkgs">
+              {
+                brand.PACKAGES.map((p) => (
+                  <label class="qd-pkg">
+                    <input type="radio" name="package" value={p.id} checked={p.id === featured.id} />
+                    <span class="qd-pkg-box">
+                      <span class="qd-pkg-row">
+                        <span class="qd-pkg-name">{p.name}</span>
+                        <span class="qd-pkg-price" data-qprices={JSON.stringify(p.prices)}>
+                          {fmt(p.prices[0])}
+                        </span>
+                      </span>
+                      <span class="qd-pkg-meta">
+                        <span class="mono">{p.duration}</span>
+                        {p.badge && <span class="chip">{p.badge}</span>}
+                      </span>
+                      <span class="qd-pkg-blurb">{p.blurb}</span>
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset class="qd-group">
+            <legend class="mono qd-legend">{q.addons}</legend>
+            <div class="qd-addons">
+              {
+                brand.ADDONS.map((a) => (
+                  <label class="qd-addon">
+                    <input type="checkbox" name="addons" value={a.id} />
+                    <span class="qd-addon-chip">
+                      <span class="tick" aria-hidden="true" />
+                      {a.name} <span class="qd-addon-price">+{fmt(a.price)}</span>
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- STEP 2 — DETAILS -->
+        <div class="qd-step" data-step="2" hidden>
+          <p class="qd-summary mono" aria-live="polite"></p>
+          <div class="qd-fields">
+            <div class="qd-field">
+              <label for="qd-name">{q.fields.name} <span class="req" aria-hidden="true">*</span></label>
+              <input id="qd-name" name="name" type="text" autocomplete="name" required aria-describedby="qd-name-err" />
+              <p class="qd-err" id="qd-name-err"></p>
+            </div>
+            <div class="qd-field">
+              <label for="qd-phone">{q.fields.phone} <span class="req" aria-hidden="true">*</span></label>
+              <input id="qd-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required aria-describedby="qd-phone-err" />
+              <p class="qd-err" id="qd-phone-err"></p>
+            </div>
+            <div class="qd-field">
+              <label for="qd-zip">{q.fields.zip}</label>
+              <input id="qd-zip" name="zip" type="text" autocomplete="postal-code" />
+            </div>
+            <div class="qd-field">
+              <label for="qd-vehicle">{q.fields.vehicle}</label>
+              <input id="qd-vehicle" name="vehicle" type="text" placeholder="2022 Honda CR-V" />
+            </div>
+            <div class="qd-field">
+              <label for="qd-date">{q.fields.date}</label>
+              <input id="qd-date" name="date" type="date" />
+            </div>
+            <fieldset class="qd-field qd-window">
+              <legend>{q.fields.window}</legend>
+              <div class="qd-window-opts">
+                {
+                  q.windows.map((w, i) => (
+                    <label class="qd-size">
+                      <input type="radio" name="window" value={w} checked={i === 0} />
+                      <span>{w}</span>
+                    </label>
+                  ))
+                }
+              </div>
+            </fieldset>
+            <div class="qd-field qd-wide">
+              <label for="qd-notes">{q.fields.notes}</label>
+              <textarea id="qd-notes" name="notes" rows="3"></textarea>
+            </div>
+            <div class="qd-hp" aria-hidden="true">
+              <label for="qd-company">Company</label>
+              <input id="qd-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+          </div>
+          <p class="qd-consent">{q.consent}</p>
+        </div>
+
+        <!-- STEP 3 — SENT -->
+        <div class="qd-step qd-sent" data-step="3" hidden>
+          <svg class="qd-check" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="29"></circle>
+            <path d="M20 33l8 8 16-17"></path>
+          </svg>
+          <h3 class="headline qd-sent-title" tabindex="-1">{q.sentTitle}</h3>
+          <p class="qd-sent-body" data-ok={q.sentBody} data-fallback={q.sentFallback}>{q.sentBody}</p>
+          <div class="qd-sent-btns">
+            {
+              brand.SMS_ENABLED ? (
+                <a class="btn btn-primary" href={smsHref()}>{q.textNow}</a>
+              ) : (
+                <a class="btn btn-primary" href={telHref}>{copy.finalCta.call} {brand.PHONE_DISPLAY}</a>
+              )
+            }
+            {brand.BOOKING_URL && (
+              <a class="btn btn-ghost" href={brand.BOOKING_URL} target="_blank" rel="noopener">{q.calendar}</a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <footer class="qd-foot">
+        <p class="qd-est">
+          <span class="mono">{q.estimate}</span>
+          <output class="qd-est-val" aria-live="polite">{fmt(featured.prices[0])}</output>
+        </p>
+        <div class="qd-actions">
+          <button class="btn btn-ghost qd-back" type="button" hidden>{q.back}</button>
+          <button class="btn btn-primary qd-next" type="button">{q.next}</button>
+          <button class="btn btn-primary qd-submit" type="submit" hidden data-sending={q.sending}>{q.submit}</button>
+          <button class="btn btn-ghost qd-done" type="button" data-qd-close hidden>{q.close}</button>
+        </div>
+      </footer>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Tiny always-loaded opener; the drawer logic is fetched on first use.
+  let mod: Promise<typeof import('../lib/quote')> | null = null;
+  document.addEventListener('click', (e) => {
+    const t = (e.target as Element | null)?.closest?.<HTMLElement>('[data-quote-open]');
+    if (!t) return;
+    e.preventDefault();
+    (mod ??= import('../lib/quote'))
+      .then((m) => m.openQuote({ packageId: t.dataset.package, opener: t }))
+      .catch((err) => console.error('[quote] failed to load', err));
+  });
+</script>
+
+<style>
+  .qd {
+    position: fixed;
+    inset: 0;
+    z-index: 960;
+  }
+
+  .qd[hidden] {
+    display: none;
+  }
+
+  .qd-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 3, 4, 0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.45s var(--ease-out);
+  }
+
+  .qd-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(520px, 100%);
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(26px) saturate(140%);
+    backdrop-filter: blur(26px) saturate(140%);
+    border-left: 1px solid var(--line-strong);
+    box-shadow: -30px 0 80px -20px rgba(0, 0, 0, 0.7);
+    transform: translateX(104%);
+    transition: transform 0.55s var(--ease-out);
+    outline: none;
+  }
+
+  .qd:global(.is-open) .qd-backdrop {
+    opacity: 1;
+  }
+
+  .qd:global(.is-open) .qd-panel {
+    transform: none;
+  }
+
+  .qd-head {
+    padding: 22px 26px 16px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 16px;
+  }
+
+  .qd-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .qd-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .qd-close {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    transition: border-color 0.3s var(--ease-out);
+  }
+
+  .qd-close:hover {
+    border-color: var(--accent);
+  }
+
+  .qd-close span::before,
+  .qd-close span::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 50%;
+    height: 1.5px;
+    background: var(--text);
+    transform: rotate(45deg);
+  }
+
+  .qd-close span::after {
+    transform: rotate(-45deg);
+  }
+
+  .qd-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .qd-steps li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 2px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    transition:
+      color 0.4s var(--ease-out),
+      border-color 0.4s var(--ease-out);
+  }
+
+  .qd-steps .n {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .qd-steps li:global(.is-done) {
+    color: var(--muted);
+    border-color: var(--accent-35);
+  }
+
+  .qd-steps li[aria-current='step'] {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .qd-form {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .qd-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 26px 28px;
+  }
+
+  .qd-step {
+    display: grid;
+    gap: 26px;
+    animation: qd-in 0.5s var(--ease-out);
+  }
+
+  .qd-step[hidden] {
+    display: none;
+  }
+
+  @keyframes qd-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  .qd-group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .qd-legend,
+  .qd-field label,
+  .qd-field legend {
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .qd input[type='radio'],
+  .qd input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  /* size + time-window pills */
+  .qd-sizes,
+  .qd-window-opts {
+    display: grid;
+    grid-template-columns: repeat(var(--n, 3), 1fr);
+    gap: 6px;
+    padding: 4px;
+    border-radius: var(--pill);
+    border: 1px solid var(--line-strong);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .qd-size {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+
+  .qd-size span {
+    display: grid;
+    place-items: center;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: var(--pill);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: var(--muted);
+    transition:
+      background 0.35s var(--ease-out),
+      color 0.35s var(--ease-out);
+  }
+
+  .qd-size input:checked + span {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .qd-size input:focus-visible + span,
+  .qd-pkg input:focus-visible + .qd-pkg-box,
+  .qd-addon input:focus-visible + .qd-addon-chip {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* package radio cards */
+  .qd-pkgs {
+    display: grid;
+    gap: 10px;
+  }
+
+  .qd-pkg {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .qd-pkg-box {
+    display: grid;
+    gap: 8px;
+    padding: 16px 18px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.025);
+    transition:
+      border-color 0.35s var(--ease-out),
+      background 0.35s var(--ease-out),
+      box-shadow 0.35s var(--ease-out);
+  }
+
+  .qd-pkg:hover .qd-pkg-box {
+    border-color: var(--line-strong);
+  }
+
+  .qd-pkg input:checked + .qd-pkg-box {
+    border-color: var(--accent);
+    background: var(--accent-12);
+    box-shadow: 0 0 30px -10px var(--accent-35);
+  }
+
+  .qd-pkg-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .qd-pkg-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .qd-pkg-price {
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 20px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .qd-pkg input:checked + .qd-pkg-box .qd-pkg-price {
+    color: var(--accent);
+  }
+
+  .qd-pkg-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .qd-pkg-meta .chip {
+    padding: 4px 9px;
+    font-size: 9.5px;
+  }
+
+  .qd-pkg-blurb {
+    font-size: 14px;
+    color: var(--text-body);
+  }
+
+  /* add-on chips */
+  .qd-addons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .qd-addon {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .qd-addon-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px 9px 10px;
+    border-radius: var(--pill);
+    border: 1px solid var(--line-strong);
+    font-size: 13.5px;
+    color: var(--text-body);
+    transition:
+      border-color 0.3s var(--ease-out),
+      background 0.3s var(--ease-out),
+      color 0.3s var(--ease-out);
+  }
+
+  .qd-addon-price {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tick {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    flex: none;
+    transition:
+      background 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out);
+  }
+
+  .tick::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2.5px;
+    width: 4px;
+    height: 7px;
+    border: solid var(--bg);
+    border-width: 0 1.6px 1.6px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  .qd-addon input:checked + .qd-addon-chip {
+    border-color: var(--accent-35);
+    background: var(--accent-12);
+    color: var(--text);
+  }
+
+  .qd-addon input:checked + .qd-addon-chip .tick {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .qd-addon input:checked + .qd-addon-chip .tick::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .qd-addon input:checked + .qd-addon-chip .qd-addon-price {
+    color: var(--accent);
+  }
+
+  /* step 2 fields */
+  .qd-summary {
+    color: var(--accent);
+    font-size: 10.5px;
+    line-height: 1.6;
+  }
+
+  .qd-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 14px;
+  }
+
+  .qd-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .qd-wide,
+  .qd-window {
+    grid-column: 1 / -1;
+  }
+
+  .req {
+    color: var(--accent);
+  }
+
+  .qd-field input,
+  .qd-field textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--line-strong);
+    background: rgba(255, 255, 255, 0.035);
+    color: var(--text);
+    font-size: 15px;
+    transition:
+      border-color 0.3s var(--ease-out),
+      background 0.3s var(--ease-out);
+    color-scheme: dark;
+  }
+
+  .qd-field textarea {
+    resize: vertical;
+    min-height: 84px;
+  }
+
+  .qd-field input::placeholder,
+  .qd-field textarea::placeholder {
+    color: var(--faint);
+  }
+
+  .qd-field input:focus,
+  .qd-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px var(--accent-12);
+  }
+
+  .qd-field input[aria-invalid='true'] {
+    border-color: #ff7a7a;
+  }
+
+  .qd-err {
+    min-height: 0;
+    font-size: 12.5px;
+    color: #ff9a9a;
+  }
+
+  .qd-err:empty {
+    display: none;
+  }
+
+  .qd-window-opts {
+    --n: 3;
+  }
+
+  .qd-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .qd-consent {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* step 3 */
+  .qd-sent {
+    justify-items: start;
+    gap: 18px;
+    padding-top: 8px;
+  }
+
+  .qd-check {
+    width: 72px;
+    height: 72px;
+  }
+
+  .qd-check circle,
+  .qd-check path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .qd-check circle {
+    stroke-dasharray: 183;
+    stroke-dashoffset: 183;
+    animation: qd-draw 0.8s var(--ease-out) forwards;
+  }
+
+  .qd-check path {
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: qd-draw 0.5s var(--ease-out) 0.55s forwards;
+  }
+
+  @keyframes qd-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .qd-sent-title {
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    outline: none;
+  }
+
+  .qd-sent-body {
+    font-size: 16px;
+    color: var(--text-body);
+    max-width: 36ch;
+  }
+
+  .qd-sent-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* sticky footer */
+  .qd-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 26px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgba(6, 8, 9, 0.55);
+  }
+
+  .qd-est {
+    display: grid;
+    gap: 2px;
+  }
+
+  .qd-est .mono {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .qd-est-val {
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+
+  .qd-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .qd-actions [hidden],
+  .qd-est[hidden] {
+    display: none;
+  }
+
+  .qd-submit[aria-busy='true'] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* bottom sheet on phones */
+  @media (max-width: 819px) {
+    .qd-panel {
+      top: auto;
+      left: 0;
+      width: 100%;
+      max-height: calc(100% - 36px);
+      height: calc(100% - 36px);
+      border-left: 0;
+      border-top: 1px solid var(--line-strong);
+      border-radius: var(--radius-l) var(--radius-l) 0 0;
+      transform: translateY(104%);
+    }
+
+    .qd-head {
+      padding: 18px var(--gutter) 14px;
+    }
+
+    .qd-body {
+      padding: 18px var(--gutter) 24px;
+    }
+
+    .qd-foot {
+      padding-inline: var(--gutter);
+    }
+
+    .qd-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .qd-field input,
+    .qd-field textarea {
+      font-size: 16px;
+    }
+
+    .qd-est-val {
+      font-size: 24px;
+    }
+
+    .qd-actions .btn {
+      padding: 0 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .qd-panel,
+    .qd-backdrop {
+      transition: none;
+    }
+    .qd-step {
+      animation: none;
+    }
+    .qd-check circle,
+    .qd-check path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

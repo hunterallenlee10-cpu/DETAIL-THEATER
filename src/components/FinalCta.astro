@@ -1,0 +1,124 @@
+---
+import { brand, telHref, smsHref } from '../config/brand';
+import { copy } from '../config/copy';
+import { stills } from '../lib/assets.server';
+import Still from './Still.astro';
+---
+
+<section class="final" aria-labelledby="final-title" data-track-area="final-cta">
+  <div class="final-bg" aria-hidden="true">
+    <Still name="KF14" alt="" class="final-still" />
+    {
+      stills.loop && (
+        <video class="final-video" muted playsinline loop preload="none" data-src-mp4={`${stills.path}loop.mp4`} data-src-webm={`${stills.path}loop.webm`} />
+      )
+    }
+  </div>
+  <div class="final-inner">
+    <h2 class="headline final-h" id="final-title" data-reveal>
+      <span class="l1">{copy.finalCta.line1}</span>
+      <span class="l2">{copy.finalCta.line2}</span>
+    </h2>
+    <div class="btn-row final-btns" data-reveal style="--i:2">
+      <button class="btn btn-primary btn-lg" type="button" data-quote-open>{copy.finalCta.quote}</button>
+      <a class="btn btn-ghost btn-lg" href={telHref}>{copy.finalCta.call} · {brand.PHONE_DISPLAY}</a>
+      {brand.SMS_ENABLED && <a class="btn btn-ghost btn-lg" href={smsHref(copy.finalCta.smsBody)}>{copy.finalCta.text}</a>}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reducedMotion } from '../lib/lenis';
+  const v = document.querySelector<HTMLVideoElement>('.final-video');
+  if (v && !reducedMotion()) {
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          if (!v.currentSrc) {
+            const webm = document.createElement('source');
+            webm.src = v.dataset.srcWebm!;
+            webm.type = 'video/webm';
+            const mp4 = document.createElement('source');
+            mp4.src = v.dataset.srcMp4!;
+            mp4.type = 'video/mp4';
+            v.append(webm, mp4);
+            v.load();
+          }
+          v.play().catch(() => {});
+        } else v.pause();
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(v);
+  }
+</script>
+
+<style>
+  .final {
+    position: relative;
+    min-height: min(100svh, 980px);
+    display: grid;
+    place-items: center;
+    padding: clamp(120px, 16vw, 220px) var(--gutter);
+    overflow: hidden;
+    text-align: center;
+    isolation: isolate;
+  }
+
+  .final-bg,
+  .final-bg :global(.final-still),
+  .final-bg :global(.final-still img),
+  .final-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .final-bg {
+    z-index: -1;
+    filter: brightness(0.35) saturate(1.1);
+  }
+
+  .final-bg :global(.final-still img),
+  .final-video {
+    object-fit: cover;
+    object-position: 58% 55%;
+  }
+
+  .final-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, var(--bg) 0%, transparent 28%, transparent 70%, var(--bg) 100%),
+      radial-gradient(60% 50% at 50% 50%, transparent, rgba(0, 0, 0, 0.4));
+  }
+
+  .final-inner {
+    display: grid;
+    justify-items: center;
+    gap: clamp(28px, 4vw, 44px);
+  }
+
+  .final-h {
+    font-size: clamp(2.4rem, 6.6vw, 8rem);
+  }
+
+  @media (min-width: 820px) {
+    .final-h > span {
+      white-space: nowrap;
+    }
+  }
+
+  .final-btns {
+    justify-content: center;
+  }
+
+  @media (max-width: 559px) {
+    .final-btns {
+      display: grid;
+      width: 100%;
+    }
+  }
+</style>

@@ -3,7 +3,18 @@ import Base from '../layouts/Base.astro';
 import Loader from '../components/Loader.astro';
 import Nav from '../components/Nav.astro';
 import Theater from '../components/Theater.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import BeadLab from '../components/BeadLab.astro';
+import WhyUs from '../components/WhyUs.astro';
+import Packages from '../components/Packages.astro';
+import QuoteDrawer from '../components/QuoteDrawer.astro';
+import Reviews from '../components/Reviews.astro';
+import ServiceArea from '../components/ServiceArea.astro';
+import Faq from '../components/Faq.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Footer from '../components/Footer.astro';
 import MobileActionBar from '../components/MobileActionBar.astro';
+import JsonLd from '../components/JsonLd.astro';
 import { copy } from '../config/copy';
 import { posterUrl } from '../lib/assets.server';
 
@@ -15,13 +26,29 @@ const mPoster = posterUrl('mobile');
   <Fragment slot="head">
     {mPoster && <link rel="preload" as="image" href={mPoster} media="(max-aspect-ratio: 4/5)" fetchpriority="high" />}
     <link rel="preload" as="image" href={dPoster} media={mPoster ? '(min-aspect-ratio: 401/500)' : undefined} fetchpriority="high" />
+    <JsonLd />
   </Fragment>
   <Loader />
   <Nav />
   <main id="top">
     <Theater />
-    <section id="before-after" class="section" style="min-height:100vh"><h2 class="headline">Next</h2></section>
-    <section id="packages" class="section" style="min-height:100vh"></section>
+    <BeforeAfter />
+    <BeadLab />
+    <WhyUs />
+    <Packages />
+    <Reviews />
+    <ServiceArea />
+    <Faq />
+    <FinalCta />
   </main>
+  <Footer />
+  <QuoteDrawer />
   <MobileActionBar />
 </Base>
+
+<script>
+  import { initReveal } from '../lib/reveal';
+  import { trackContactLinks } from '../lib/analytics';
+  initReveal();
+  trackContactLinks();
+</script>
