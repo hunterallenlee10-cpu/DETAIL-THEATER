@@ -1,0 +1,153 @@
+---
+import { brand, socials, telHref, smsHref, mailHref } from '../config/brand';
+import { copy } from '../config/copy';
+import Logo from './Logo.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer" data-track-area="footer">
+  <div class="wrap grid">
+    <div class="col brand-col">
+      <Logo id="footer-logo" />
+      <p class="blurb">{copy.area.body}</p>
+    </div>
+    <div class="col">
+      <h3 class="mono label">{copy.footer.hours}</h3>
+      <p>{brand.HOURS}</p>
+    </div>
+    <div class="col">
+      <h3 class="mono label">{copy.footer.area}</h3>
+      <p>{brand.PRIMARY_CITY}</p>
+      <p class="muted">{brand.SERVICE_TOWNS.join(' · ')}</p>
+    </div>
+    <div class="col">
+      <h3 class="mono label">{copy.footer.contact}</h3>
+      <ul class="links">
+        <li><a href={telHref}>{brand.PHONE_DISPLAY}</a></li>
+        {brand.SMS_ENABLED && <li><a href={smsHref()}>Text us</a></li>}
+        <li><a href={mailHref()}>{brand.EMAIL}</a></li>
+      </ul>
+    </div>
+    {
+      socials.length > 0 && (
+        <div class="col">
+          <h3 class="mono label">{copy.footer.social}</h3>
+          <ul class="links">
+            {socials.map((s) => (
+              <li>
+                <a href={s.url} target="_blank" rel="noopener">
+                  {s.label} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+  <div class="wrap bottom mono">
+    <span>© {year} {brand.BRAND_NAME}</span>
+    <a href="/privacy">{copy.footer.privacy}</a>
+    <a class="credit" href={brand.CREDIT_URL} target="_blank" rel="noopener">{brand.CREDIT_TEXT}</a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: clamp(56px, 7vw, 96px) var(--gutter) calc(32px + env(safe-area-inset-bottom));
+    background: var(--bg);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr));
+    gap: 36px 28px;
+  }
+
+  .brand-col {
+    display: grid;
+    align-content: start;
+    gap: 18px;
+  }
+
+  .blurb {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 34ch;
+  }
+
+  .label {
+    color: var(--accent);
+    font-size: 10.5px;
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+
+  .col p,
+  .links a {
+    font-size: 14.5px;
+    color: var(--text-body);
+  }
+
+  .muted {
+    color: var(--muted) !important;
+    margin-top: 6px;
+    font-size: 13.5px !important;
+  }
+
+  .links {
+    display: grid;
+    gap: 6px;
+  }
+
+  .links a {
+    transition: color 0.3s var(--ease-out);
+    overflow-wrap: anywhere;
+  }
+
+  .links a:hover,
+  .bottom a:hover {
+    color: var(--accent);
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: clamp(48px, 6vw, 80px);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+
+  .bottom a {
+    transition: color 0.3s var(--ease-out);
+  }
+
+  .credit {
+    margin-left: auto;
+  }
+
+  @media (max-width: 1023px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .brand-col {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 819px) {
+    .footer {
+      padding-bottom: calc(104px + env(safe-area-inset-bottom));
+    }
+
+    .credit {
+      margin-left: 0;
+    }
+  }
+</style>

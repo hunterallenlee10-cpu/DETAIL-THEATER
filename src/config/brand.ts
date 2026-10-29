@@ -248,10 +248,17 @@ export const mailHref = (subject = '', body = ''): string => {
   return `mailto:${brand.EMAIL.replace(/[[\]]/g, '')}${qs ? `?${qs}` : ''}`;
 };
 
-/** Canonical site URL. Falls back to example.com while DOMAIN is a placeholder. */
-export const siteUrl = isPlaceholder(brand.DOMAIN)
-  ? 'https://example.com'
-  : `https://${brand.DOMAIN.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+/**
+ * Canonical site URL. While DOMAIN is a placeholder, a Vercel build uses the
+ * project's production URL (system env var); anywhere else it's example.com.
+ */
+const vercelUrl =
+  typeof process !== 'undefined' ? process.env?.VERCEL_PROJECT_PRODUCTION_URL : undefined;
+export const siteUrl = !isPlaceholder(brand.DOMAIN)
+  ? `https://${brand.DOMAIN.replace(/^https?:\/\//, '').replace(/\/$/, '')}`
+  : vercelUrl
+    ? `https://${vercelUrl}`
+    : 'https://example.com';
 
 /** "a E-Class" → "an E-Class". */
 export const withArticle = (noun: string): string =>

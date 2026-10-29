@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { brand } from '../config/brand';
+import { stills } from '../lib/assets.server';
+---
+
+<Base title={`Not found | ${brand.BRAND_NAME}`} description="This page doesn't exist." path="/404" noindex>
+  <main class="nf" style={`--bg-img:url(${stills.path}KF00-1920.webp)`}>
+    <p class="eyebrow">Error 404 · Gloss 0%</p>
+    <h1 class="headline"><span class="l1">Wrong</span><span class="l2">driveway.</span></h1>
+    <p class="body">This page took a wrong turn. The detail is back at the start.</p>
+    <a class="btn btn-primary btn-lg" href="/">Back to the site</a>
+  </main>
+</Base>
+
+<style>
+  .nf {
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 24px;
+    padding: var(--gutter);
+    background:
+      linear-gradient(90deg, var(--bg) 20%, rgba(6, 8, 9, 0.6)),
+      var(--bg-img) center / cover no-repeat;
+  }
+</style>

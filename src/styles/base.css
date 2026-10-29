@@ -135,7 +135,7 @@ html.lenis body {
 /* Section scaffolding */
 .section {
   position: relative;
-  padding: clamp(88px, 13vw, 180px) var(--gutter);
+  padding: clamp(72px, 9vw, 132px) var(--gutter);
 }
 
 .wrap {
@@ -149,6 +149,7 @@ html.lenis body {
   margin-bottom: clamp(40px, 6vw, 80px);
 }
 
-body.scroll-locked {
+html.scroll-locked,
+html.scroll-locked body {
   overflow: hidden;
 }

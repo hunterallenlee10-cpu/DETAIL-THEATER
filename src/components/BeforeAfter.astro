@@ -1,0 +1,287 @@
+---
+import { copy } from '../config/copy';
+import { brand } from '../config/brand';
+import SectionHead from './SectionHead.astro';
+import Still from './Still.astro';
+
+const { tabs } = copy.beforeAfter;
+---
+
+<section id="before-after" class="section ba" aria-labelledby="ba-title" data-track-area="before-after">
+  <div class="wrap">
+    <SectionHead id="ba-title" eyebrow={copy.beforeAfter.eyebrow} line1={copy.beforeAfter.line1} line2={copy.beforeAfter.line2}>
+      <div class="segmented ba-tabs" role="tablist" aria-label="Choose a comparison" data-reveal style="--i:2">
+        <span class="pill" aria-hidden="true"></span>
+        {
+          tabs.map((t, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`ba-tab-${t.id}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              aria-controls="ba-panel"
+              tabindex={i === 0 ? 0 : -1}
+              data-tab={i}
+            >
+              {t.label}
+            </button>
+          ))
+        }
+      </div>
+    </SectionHead>
+
+    <div class="ba-frame" id="ba-panel" role="tabpanel" aria-labelledby={`ba-tab-${tabs[0].id}`} data-reveal style="--pos:50">
+      {
+        tabs.map((t, i) => (
+          <div class="ba-pair" data-pair={i} hidden={i !== 0}>
+            <Still name={t.before} alt={`${t.label} before detailing`} class="ba-img ba-before" crop position={t.pos} sizes="(min-width: 1320px) 1320px, 100vw" />
+            <Still name={t.after} alt={`${t.label} after detailing`} class="ba-img ba-after" crop position={t.pos} sizes="(min-width: 1320px) 1320px, 100vw" />
+          </div>
+        ))
+      }
+      <span class="ba-tag mono is-before" aria-hidden="true">{copy.beforeAfter.before}</span>
+      <span class="ba-tag mono is-after" aria-hidden="true">{copy.beforeAfter.after}</span>
+      <div class="ba-handle" aria-hidden="true">
+        <span class="ba-knob glass">◀ ▶</span>
+      </div>
+      <label class="sr-only" for="ba-range">{copy.beforeAfter.hint}: {brand.VEHICLE_SHORT}</label>
+      <input id="ba-range" class="ba-range" type="range" min="0" max="100" step="0.5" value="50" aria-valuetext="50% after" />
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reducedMotion } from '../lib/lenis';
+
+  const root = document.getElementById('before-after');
+  if (root) {
+    const frame = root.querySelector<HTMLElement>('.ba-frame')!;
+    const range = root.querySelector<HTMLInputElement>('.ba-range')!;
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const pairs = Array.from(root.querySelectorAll<HTMLElement>('.ba-pair'));
+    const pill = root.querySelector<HTMLElement>('.ba-tabs .pill')!;
+
+    const setPos = (v: number) => {
+      frame.style.setProperty('--pos', String(v));
+      range.setAttribute('aria-valuetext', `${Math.round(100 - v)}% after`);
+    };
+    range.addEventListener('input', () => {
+      sweep?.kill?.();
+      setPos(Number(range.value));
+    });
+
+    const movePill = (i: number) => {
+      const b = tabs[i];
+      pill.style.width = `${b.offsetWidth}px`;
+      pill.style.transform = `translateX(${b.offsetLeft - 4}px)`;
+    };
+
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, k) => {
+        t.setAttribute('aria-selected', String(k === i));
+        t.tabIndex = k === i ? 0 : -1;
+      });
+      pairs.forEach((p, k) => (p.hidden = k !== i));
+      frame.setAttribute('aria-labelledby', tabs[i].id);
+      movePill(i);
+      if (focus) tabs[i].focus();
+    };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        select((i + d + tabs.length) % tabs.length, true);
+      });
+    });
+    new ResizeObserver(() => movePill(tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true'))).observe(pill.parentElement!);
+    movePill(0);
+
+    // One-time auto-sweep to teach the interaction: 50 → 18 → 82 → 50 over 2.4s.
+    let sweep: { kill?: () => void } | null = null;
+    if (!reducedMotion()) {
+      const io = new IntersectionObserver(
+        ([e]) => {
+          if (!e.isIntersecting) return;
+          io.disconnect();
+          const keys = [50, 18, 82, 50];
+          const seg = 800;
+          const t0 = performance.now();
+          let raf = 0;
+          const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+          const tick = (now: number) => {
+            const t = (now - t0) / seg;
+            const k = Math.min(keys.length - 2, Math.floor(t));
+            const local = Math.min(1, t - k);
+            const v = keys[k] + (keys[k + 1] - keys[k]) * ease(local);
+            range.value = String(v);
+            setPos(v);
+            if (t < keys.length - 1) raf = requestAnimationFrame(tick);
+          };
+          setTimeout(() => (raf = requestAnimationFrame(tick)), 450);
+          sweep = { kill: () => cancelAnimationFrame(raf) };
+          frame.addEventListener('pointerdown', () => sweep?.kill?.(), { once: true });
+        },
+        { threshold: 0.55 },
+      );
+      io.observe(frame);
+    }
+  }
+</script>
+
+<style>
+  .ba :global(.section-head) {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .ba :global(.section-head) > :global(.eyebrow),
+  .ba :global(.section-head) > :global(.headline) {
+    grid-column: 1;
+  }
+
+  .ba-tabs {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
+  }
+
+  .ba-frame {
+    --pos: 50;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: 0 40px 120px -40px rgba(0, 0, 0, 0.8);
+    background: var(--bg-2);
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .ba-pair,
+  .ba-pair :global(.ba-img),
+  .ba-pair :global(.ba-img img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ba-pair[hidden] {
+    display: none;
+  }
+
+  .ba-pair :global(.ba-img img) {
+    object-fit: cover;
+  }
+
+  .ba-pair :global(.ba-after) {
+    clip-path: inset(0 0 0 calc(var(--pos) * 1%));
+  }
+
+  .ba-tag {
+    position: absolute;
+    top: 18px;
+    padding: 7px 12px;
+    border-radius: var(--pill);
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--line);
+    font-size: 10.5px;
+    pointer-events: none;
+  }
+
+  .ba-tag.is-before {
+    left: 18px;
+  }
+
+  .ba-tag.is-after {
+    right: 18px;
+    color: var(--accent);
+  }
+
+  .ba-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--pos) * 1%);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--text);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+  }
+
+  .ba-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text);
+    border-color: var(--line-strong);
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .ba-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    touch-action: pan-y;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .ba-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 56px;
+    height: 100vh;
+  }
+
+  .ba-range::-moz-range-thumb {
+    width: 56px;
+    height: 100vh;
+    border: 0;
+  }
+
+  .ba-frame:has(.ba-range:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .ba-frame:has(.ba-range:active) .ba-knob {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  @media (max-width: 819px) {
+    .ba :global(.section-head) {
+      grid-template-columns: 1fr;
+    }
+
+    .ba-tabs {
+      grid-column: 1;
+      grid-row: auto;
+      justify-self: start;
+    }
+
+    .ba-frame {
+      aspect-ratio: 4 / 5;
+      border-radius: var(--radius-m);
+    }
+  }
+</style>

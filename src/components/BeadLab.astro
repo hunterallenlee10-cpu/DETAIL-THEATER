@@ -1,0 +1,349 @@
+---
+/**
+ * The Bead Lab (#ceramic): drag to rain on glossy paint, toggle Ceramic / Unprotected.
+ * Engine: src/lib/beadlab.ts (lazy-loaded when the section nears the viewport).
+ */
+import { brand } from '../config/brand';
+import { copy } from '../config/copy';
+import Still from './Still.astro';
+
+const c = copy.beadLab;
+const stats = c.stats.map((s) => ({
+  ...s,
+  coated: brand.CERAMIC_STATS.coated[s.key],
+  unprotected: brand.CERAMIC_STATS.unprotected[s.key],
+}));
+---
+
+<section id="ceramic" class="section beadlab" data-mode="ceramic" data-track-area="beadlab" aria-labelledby="beadlab-title">
+  <div class="wrap bl-grid">
+    <div class="bl-copy">
+      <p class="eyebrow" data-reveal>{c.eyebrow}</p>
+      <h2 class="headline bl-title" id="beadlab-title" data-reveal style="--i:1">
+        <span class="l1">{c.line1}</span>
+        <span class="l2">{c.line2}</span>
+      </h2>
+      <p class="body" data-reveal style="--i:2">{c.body}</p>
+
+      <div class="segmented bl-toggle" role="group" aria-label="Paint finish" data-reveal style="--i:3">
+        <span class="pill" aria-hidden="true"></span>
+        <button type="button" data-mode="ceramic" aria-pressed="true">{c.coated}</button>
+        <button type="button" data-mode="unprotected" aria-pressed="false">{c.unprotected}</button>
+      </div>
+
+      <hr class="bl-rule" />
+
+      <dl class="bl-stats" data-reveal style="--i:4">
+        {
+          stats.map((s) => (
+            <div class="bl-stat">
+              <dt class="mono">{s.label}</dt>
+              <dd data-ceramic={s.coated} data-unprotected={s.unprotected}>
+                <span class="bl-val" aria-hidden="true">{s.coated}</span>
+                <span class="sr-only bl-sr">{s.coated}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="bl-stage">
+      <div class="bl-panel">
+        <Still name="PAINT-MACRO" alt="" class="bl-paint" sizes="(min-width: 820px) 60vw, 100vw" />
+        <Still name="PAINT-MACRO-DULL" alt="" class="bl-paint bl-paint-dull" sizes="(min-width: 820px) 60vw, 100vw" />
+        <canvas class="bl-canvas" role="img" aria-label="Water drops on car paint" aria-describedby="beadlab-desc"></canvas>
+        <p class="sr-only" id="beadlab-desc">{c.srDescription}</p>
+        <div class="bl-sheen" aria-hidden="true"></div>
+        <p class="mono bl-caption" aria-hidden="true">{c.caption}</p>
+        <button type="button" class="btn btn-ghost btn-sm bl-rain">{c.rain}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  type Mode = 'ceramic' | 'unprotected';
+  type Sim = { setMode(m: Mode): void };
+
+  const section = document.getElementById('ceramic');
+  if (section) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let sim: Sim | null = null;
+    const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>('.bl-toggle button'));
+    const vals = Array.from(section.querySelectorAll<HTMLElement>('.bl-stats dd'));
+
+    const numOf = (v: string) => {
+      const m = v.match(/\d+(?:\.\d+)?/);
+      return m ? parseFloat(m[0]) : null;
+    };
+
+    const animateStat = (dd: HTMLElement, from: string, to: string) => {
+      const el = dd.querySelector<HTMLElement>('.bl-val')!;
+      dd.querySelector<HTMLElement>('.bl-sr')!.textContent = to;
+      const a = numOf(from);
+      const b = numOf(to);
+      if (reduced) {
+        el.textContent = to;
+        return;
+      }
+      if (a !== null && b !== null && a !== b) {
+        // count-up: keep the target's text, tween its number
+        const m = to.match(/\d+(?:\.\d+)?/)!;
+        const pre = to.slice(0, m.index);
+        const post = to.slice(m.index! + m[0].length);
+        const t0 = performance.now();
+        const D = 700;
+        const tick = (t: number) => {
+          const k = Math.min(1, (t - t0) / D);
+          const e = 1 - Math.pow(1 - k, 3);
+          el.textContent = `${pre}${Math.round(a + (b - a) * e)}${post}`;
+          if (k < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      } else {
+        el.classList.add('is-swapping');
+        setTimeout(() => {
+          el.textContent = to;
+          el.classList.remove('is-swapping');
+        }, 200);
+      }
+    };
+
+    const setMode = (mode: Mode) => {
+      const prev = section.dataset.mode as Mode;
+      if (prev === mode) return;
+      section.dataset.mode = mode;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+      vals.forEach((dd) => animateStat(dd, dd.dataset[prev] ?? '', dd.dataset[mode] ?? ''));
+      sim?.setMode(mode);
+    };
+    buttons.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as Mode)));
+
+    const load = () =>
+      import('../lib/beadlab').then(({ mountBeadLab }) => {
+        sim = mountBeadLab(section);
+      });
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            load();
+          }
+        },
+        { rootMargin: '400px 0px' },
+      );
+      io.observe(section);
+    } else load();
+  }
+</script>
+
+<style>
+  .bl-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    gap: clamp(40px, 5vw, 80px);
+  }
+
+  .bl-copy {
+    display: grid;
+    gap: 22px;
+    justify-items: start;
+  }
+
+  .bl-title {
+    font-size: clamp(2.2rem, 3.8vw, 4.4rem);
+  }
+
+  .bl-toggle {
+    margin-top: 8px;
+  }
+
+  .bl-toggle .pill {
+    width: calc((100% - 8px) / 2);
+  }
+
+  .beadlab[data-mode='unprotected'] .bl-toggle .pill {
+    transform: translateX(100%);
+  }
+
+  .bl-rule {
+    width: 100%;
+    height: 1px;
+    margin: 6px 0 0;
+    border: 0;
+    background: var(--line);
+  }
+
+  .bl-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0;
+  }
+
+  .bl-stat {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .bl-stat dt {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .bl-stat dd {
+    margin: 0;
+    /* room for two lines, so toggling never shifts the layout */
+    min-height: calc(2 * 1.05 * clamp(1.25rem, 2vw, 2rem));
+  }
+
+  .bl-val {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.25rem, 2vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    transition:
+      opacity 0.2s var(--ease-out),
+      color 0.5s var(--ease-out);
+  }
+
+  .beadlab[data-mode='unprotected'] .bl-val {
+    color: var(--muted);
+  }
+
+  .bl-val:global(.is-swapping) {
+    opacity: 0;
+  }
+
+  /* ── Panel ── */
+  .bl-stage {
+    perspective: 1200px;
+  }
+
+  .bl-panel {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: #030405;
+    box-shadow:
+      0 60px 120px -30px rgba(0, 0, 0, 0.85),
+      0 24px 50px -20px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transform: perspective(1200px) rotateY(-9deg) rotateX(4deg);
+    transform-style: flat;
+    will-change: transform;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .bl-panel :global(.bl-paint),
+  .bl-panel :global(.bl-paint img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bl-panel :global(.bl-paint img) {
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .bl-panel :global(.bl-paint-dull) {
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  .beadlab[data-mode='unprotected'] .bl-panel :global(.bl-paint-dull) {
+    opacity: 1;
+  }
+
+  .bl-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  .bl-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent 38%);
+  }
+
+  .bl-caption {
+    position: absolute;
+    left: 18px;
+    bottom: 16px;
+    font-size: 10px;
+    color: rgba(242, 245, 247, 0.6);
+    pointer-events: none;
+  }
+
+  .bl-rain {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+  }
+
+  @media (max-width: 819px) {
+    .bl-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bl-stage {
+      order: 2;
+    }
+
+    .bl-panel {
+      transform: perspective(1200px) rotateY(-4deg) rotateX(2.5deg);
+    }
+
+    .bl-toggle {
+      width: 100%;
+    }
+
+    .bl-toggle button {
+      padding: 0 10px;
+    }
+
+    .bl-caption {
+      display: none;
+    }
+  }
+
+  @media (min-width: 820px) and (pointer: fine) {
+    .bl-rain {
+      opacity: 0.75;
+    }
+
+    .bl-rain:hover {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bl-panel :global(.bl-paint-dull),
+    .bl-val {
+      transition: none;
+    }
+  }
+</style>

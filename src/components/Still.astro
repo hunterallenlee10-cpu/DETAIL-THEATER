@@ -1,0 +1,37 @@
+---
+/** Responsive still from public/stills (AVIF + WebP, optional 4:5 phone crop). */
+import { still, hasCrop } from '../lib/assets.server';
+
+interface Props {
+  name: string;
+  alt: string;
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  class?: string;
+  /** Use the 4:5 crop below 820px (only exists for before/after pairs). */
+  crop?: boolean;
+  position?: string;
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const { name, alt, sizes = '100vw', loading = 'lazy', class: cls, crop = false, position, fetchpriority } = Astro.props;
+const useCrop = crop && hasCrop(name);
+---
+
+<picture class={cls}>
+  {useCrop && <source media="(max-width: 819px)" type="image/avif" srcset={still(name, 'm', 'avif')} />}
+  {useCrop && <source media="(max-width: 819px)" type="image/webp" srcset={still(name, 'm', 'webp')} />}
+  <source type="image/avif" srcset={`${still(name, 960, 'avif')} 960w, ${still(name, 1920, 'avif')} 1920w`} sizes={sizes} />
+  <img
+    src={still(name, 1920)}
+    srcset={`${still(name, 960)} 960w, ${still(name, 1920)} 1920w`}
+    sizes={sizes}
+    alt={alt}
+    width="1920"
+    height="1080"
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+    style={position ? `object-position:${position}` : undefined}
+  />
+</picture>

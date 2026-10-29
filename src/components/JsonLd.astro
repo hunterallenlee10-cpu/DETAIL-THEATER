@@ -1,0 +1,72 @@
+---
+/**
+ * Structured data: AutoWash (LocalBusiness subtype), one Service per package,
+ * FAQPage. aggregateRating is included ONLY when both rating fields are real.
+ */
+import { brand, hasRating, siteUrl, socials, phoneDigits } from '../config/brand';
+import { copy } from '../config/copy';
+
+const id = `${siteUrl}/#business`;
+const openingHours = (() => {
+  // "Mon–Sat · 8am–6pm" → "Mo-Sa 08:00-18:00" (best effort; falls back to the raw string)
+  const m = brand.HOURS.match(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s*[–-]\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*.*?(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[–-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if (!m) return brand.HOURS;
+  const d = (s: string) => s.slice(0, 2);
+  const t = (h: string, mm: string | undefined, ap: string) => {
+    let hh = Number(h) % 12;
+    if (ap.toLowerCase() === 'pm') hh += 12;
+    return `${String(hh).padStart(2, '0')}:${mm ?? '00'}`;
+  };
+  return `${d(m[1])}-${d(m[2])} ${t(m[3], m[4], m[5])}-${t(m[6], m[7], m[8])}`;
+})();
+
+const business: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'AutoWash',
+  '@id': id,
+  name: brand.BRAND_NAME,
+  description: copy.meta.description,
+  url: siteUrl,
+  image: `${siteUrl}/og.jpg`,
+  logo: `${siteUrl}/apple-touch-icon.png`,
+  telephone: phoneDigits,
+  email: brand.EMAIL,
+  priceRange: '$$',
+  openingHours,
+  areaServed: brand.SERVICE_TOWNS.map((t) => ({ '@type': 'City', name: t })),
+  address: { '@type': 'PostalAddress', addressLocality: brand.PRIMARY_CITY },
+};
+if (socials.length) business.sameAs = socials.map((s) => s.url);
+if (hasRating) {
+  business.aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: brand.GOOGLE_RATING,
+    reviewCount: brand.GOOGLE_REVIEW_COUNT,
+  };
+}
+
+const services = brand.PACKAGES.map((p) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: p.name,
+  description: p.blurb,
+  serviceType: 'Mobile car detailing',
+  provider: { '@id': id },
+  areaServed: brand.SERVICE_TOWNS,
+  offers: { '@type': 'Offer', price: Math.min(...p.prices), priceCurrency: 'USD' },
+}));
+
+const faq = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: copy.faq.items.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const graph = [business, ...services, faq];
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />

@@ -1,0 +1,178 @@
+{
+  "version": 3,
+  "build": "rmvsu4rdz",
+  "placeholder": false,
+  "sets": {
+    "desktop": {
+      "count": 284,
+      "w": 1440,
+      "h": 804,
+      "path": "/seq/rmvsu4rdz/desktop/"
+    },
+    "mobile": {
+      "count": 284,
+      "w": 720,
+      "h": 1282,
+      "path": "/seq/rmvsu4rdz/mobile/"
+    }
+  },
+  "segments": [
+    {
+      "id": "S01",
+      "start": 0,
+      "end": 25,
+      "chapter": "arrival",
+      "transitionOut": null
+    },
+    {
+      "id": "S02",
+      "start": 26,
+      "end": 46,
+      "chapter": "foam",
+      "transitionOut": null
+    },
+    {
+      "id": "S03",
+      "start": 47,
+      "end": 67,
+      "chapter": "wash",
+      "transitionOut": null
+    },
+    {
+      "id": "S04",
+      "start": 68,
+      "end": 88,
+      "chapter": "rinse",
+      "transitionOut": null
+    },
+    {
+      "id": "S05",
+      "start": 89,
+      "end": 109,
+      "chapter": "wheels",
+      "transitionOut": null
+    },
+    {
+      "id": "S06",
+      "start": 110,
+      "end": 128,
+      "chapter": "iron",
+      "transitionOut": null
+    },
+    {
+      "id": "S07",
+      "start": 129,
+      "end": 147,
+      "chapter": "iron",
+      "transitionOut": null
+    },
+    {
+      "id": "S08",
+      "start": 148,
+      "end": 168,
+      "chapter": "dry",
+      "transitionOut": "flash"
+    },
+    {
+      "id": "S09",
+      "start": 169,
+      "end": 190,
+      "chapter": "vacuum",
+      "transitionOut": null
+    },
+    {
+      "id": "S10",
+      "start": 191,
+      "end": 211,
+      "chapter": "leather",
+      "transitionOut": "flash"
+    },
+    {
+      "id": "S11",
+      "start": 212,
+      "end": 233,
+      "chapter": "glass",
+      "transitionOut": null
+    },
+    {
+      "id": "S12",
+      "start": 234,
+      "end": 254,
+      "chapter": "protect",
+      "transitionOut": null
+    },
+    {
+      "id": "S13",
+      "start": 255,
+      "end": 283,
+      "chapter": "reveal",
+      "transitionOut": null
+    }
+  ],
+  "chapters": [
+    {
+      "id": "arrival",
+      "start": 0,
+      "end": 25
+    },
+    {
+      "id": "foam",
+      "start": 26,
+      "end": 46
+    },
+    {
+      "id": "wash",
+      "start": 47,
+      "end": 67
+    },
+    {
+      "id": "rinse",
+      "start": 68,
+      "end": 88
+    },
+    {
+      "id": "wheels",
+      "start": 89,
+      "end": 109
+    },
+    {
+      "id": "iron",
+      "start": 110,
+      "end": 147
+    },
+    {
+      "id": "dry",
+      "start": 148,
+      "end": 168
+    },
+    {
+      "id": "vacuum",
+      "start": 169,
+      "end": 190
+    },
+    {
+      "id": "leather",
+      "start": 191,
+      "end": 211
+    },
+    {
+      "id": "glass",
+      "start": 212,
+      "end": 233
+    },
+    {
+      "id": "protect",
+      "start": 234,
+      "end": 254
+    },
+    {
+      "id": "reveal",
+      "start": 255,
+      "end": 283
+    }
+  ],
+  "cuts": [
+    169,
+    212
+  ]
+}

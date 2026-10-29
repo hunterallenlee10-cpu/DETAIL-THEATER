@@ -54,7 +54,7 @@ export const copy = {
     line1: 'See the',
     line2: 'difference.',
     tabs: [
-      { id: 'exterior', label: 'Exterior', before: 'KF00', after: 'BA-CLEAN', pos: '58% 55%' },
+      { id: 'exterior', label: 'Exterior', before: 'KF00', after: 'BA-CLEAN', pos: '60% 50%' },
       { id: 'wheels', label: 'Wheels', before: 'KF05', after: 'KF07', pos: '50% 50%' },
       { id: 'interior', label: 'Interior', before: 'KF09', after: 'KF11', pos: '45% 50%' },
     ],

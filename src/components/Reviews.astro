@@ -1,0 +1,184 @@
+---
+/**
+ * Reviews. Renders ONLY real data from brand.ts:
+ *  - REVIEWS present → two-row marquee (+ rating line if both rating fields are set)
+ *  - no REVIEWS but GOOGLE_REVIEWS_URL → one wide card linking to Google
+ *  - neither → nothing (the nav link is hidden too)
+ */
+import { brand, hasRating, showReviews } from '../config/brand';
+import { copy } from '../config/copy';
+import SectionHead from './SectionHead.astro';
+
+const reviews = brand.REVIEWS;
+const fill = <T,>(list: T[], min: number): T[] => {
+  if (!list.length) return [];
+  const out: T[] = [];
+  while (out.length < min) out.push(...list);
+  return out;
+};
+const half = Math.ceil(reviews.length / 2);
+const rowA = fill(reviews.length > 3 ? reviews.slice(0, half) : reviews, 6);
+const rowB = fill(reviews.length > 3 ? reviews.slice(half) : [...reviews].reverse(), 6);
+const stars = (n: number) => '★'.repeat(Math.max(0, Math.min(5, Math.round(n))));
+---
+
+{
+  showReviews && (
+    <section id="reviews" class="section reviews" aria-labelledby="reviews-title">
+      <div class="wrap">
+        <SectionHead id="reviews-title" eyebrow={copy.reviews.eyebrow} line1={copy.reviews.line1} line2={copy.reviews.line2}>
+          {hasRating && (
+            <p class="rating mono" data-reveal style="--i:2">
+              <span class="gold">{brand.GOOGLE_RATING} ★</span> · {brand.GOOGLE_REVIEW_COUNT} reviews
+              {brand.GOOGLE_REVIEWS_URL && (
+                <>
+                  {' '}·{' '}
+                  <a class="text-link" href={brand.GOOGLE_REVIEWS_URL} target="_blank" rel="noopener">
+                    Google ↗
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+        </SectionHead>
+      </div>
+
+      {reviews.length > 0 ? (
+        <div class="marquee" data-reveal>
+          {[rowA, rowB].map((row, r) => (
+            <div class:list={['row', { reverse: r === 1 }]}>
+              <ul class="track">
+                {[...row, ...row].map((rv, k) => (
+                  <li class="review glass" aria-hidden={k >= row.length ? 'true' : undefined}>
+                    <span class="stars" aria-label={`${rv.stars} out of 5 stars`}>{stars(rv.stars)}</span>
+                    <p class="quote">“{rv.text}”</p>
+                    <p class="who mono">
+                      {rv.name} · {rv.source}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="wrap">
+          <div class="fallback glass" data-reveal>
+            <p class="fallback-title">{copy.reviews.fallback}</p>
+            <a class="btn btn-primary" href={brand.GOOGLE_REVIEWS_URL} target="_blank" rel="noopener">
+              {copy.reviews.fallbackCta}
+            </a>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .reviews {
+    padding-inline: 0;
+  }
+
+  .reviews .wrap {
+    padding-inline: var(--gutter);
+  }
+
+  .rating {
+    color: var(--text-body);
+  }
+
+  .gold {
+    color: var(--gold);
+  }
+
+  .marquee {
+    display: grid;
+    gap: 14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .row {
+    overflow: hidden;
+  }
+
+  .track {
+    display: flex;
+    gap: 14px;
+    width: max-content;
+    animation: marquee 60s linear infinite;
+  }
+
+  .row.reverse .track {
+    animation-direction: reverse;
+    animation-duration: 70s;
+  }
+
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(calc(-50% - 7px));
+    }
+  }
+
+  .review {
+    width: min(380px, 80vw);
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 22px 24px;
+  }
+
+  .stars {
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-size: 14px;
+  }
+
+  .quote {
+    color: var(--text-body);
+    font-size: 15px;
+  }
+
+  .who {
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+
+  .fallback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    padding: clamp(26px, 4vw, 44px);
+  }
+
+  .fallback-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.3rem, 2.4vw, 2rem);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    max-width: 22ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row {
+      overflow-x: auto;
+    }
+
+    .track {
+      animation: none;
+    }
+
+    .track > [aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>
